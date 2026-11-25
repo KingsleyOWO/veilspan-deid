@@ -1,12 +1,18 @@
 # VeilSpan 文件去識別化
 
-Self-hosted redaction and reversible masking for Traditional Chinese documents.
+為繁體中文文件設計的自架式 Agentic 遮蔽與代號還原工具。
 
 [English](README.md) · 繁體中文
 
-為繁體中文與台灣文件設計的自架工具。上傳 Word、Excel 或 PDF，逐筆確認個資，再下載遮蔽檔，或將原文轉成代號交給雲端模型處理。
+上傳 Word、Excel 或 PDF，逐筆確認個資，再下載遮蔽檔，或將原文轉成代號交給雲端模型處理。偵測以繁體中文與台灣常見的個資格式為主。
 
 ![VeilSpan 首頁，顯示「遮蔽」和「代號＋還原」兩種功能](docs/images/zh-home.png)
+
+## Agentic 偵測怎麼運作
+
+模型會透過工具決定下一步要查什麼，例如讀取前後文、搜尋姓名變體、查看圖片，或標記疑似誤判。VeilSpan 會追蹤哪些部分已檢查。代理提早停止時，未檢查的部分會交由標準流程補查。電子郵件和可驗證檢查碼的證號等常見格式也有規則保底。
+
+上下文判斷的品質和處理時間會受所選模型影響。建議選擇繁中理解及工具呼叫能力穩定的模型。支援圖片輸入的模型也可協助判斷圖片。使用者確認要處理的位置後，VeilSpan 依選取結果遮蔽或寫入代號，並檢查輸出是否仍有殘留。
 
 ## 兩種用法
 
@@ -53,11 +59,9 @@ Self-hosted redaction and reversible masking for Traditional Chinese documents.
 
 我原本用 Presidio 處理繁中文件。在我當時的配置和文件上，個資大多抓得到，但路名、型號和機關名稱也常被遮掉，交付前得逐筆改回來。我因此做了一套把文件上下文、人工審閱和原格式輸出接在一起的工具。
 
-代理可以查看文件結構、搜尋姓名的其他寫法、檢查圖片與候選項，也能標記疑似誤判。由使用者確認要遮的位置，再由程式改檔並檢查輸出是否還留有選定要遮蔽的內容。
-
 ## 快速開始
 
-需要 Linux、Python 3.12，以及可連線的 OpenAI 相容模型端點。模型若支援工具呼叫和圖片輸入，就能使用相應的代理與圖片判斷功能。安裝會下載 OCR 和人臉偵測模型。
+需要 Linux、Python 3.12，以及可連線的 OpenAI 相容 Chat Completions 端點。安裝會下載 OCR 和人臉偵測模型。
 
 ```bash
 ./scripts/setup.sh
@@ -69,9 +73,15 @@ Self-hosted redaction and reversible masking for Traditional Chinese documents.
 ./run.sh
 ```
 
-瀏覽器開啟 `http://127.0.0.1:8620`。如需用 Docker 部署，執行 `./scripts/docker-up.sh`。Docker 會掛載主機的 Docker socket，以啟動隔離的文件檢查容器。服務目前沒有登入機制，請部署在可信任的環境。
+瀏覽器開啟 `http://127.0.0.1:8620`。如需用 Docker 部署，執行 `./scripts/docker-up.sh`。Docker 會掛載主機的 Docker socket，以啟動隔離的文件檢查容器。
 
-文件內容會送到 `.env` 所設定的模型端點。若要讓原始文件留在你的環境，請填入本機或內網模型端點。下載或把代號版交給雲端前，請複核偵測結果及介面列出的注意事項。
+### 選擇偵測模型的部署位置
+
+偵測可接本機模型、內網服務或相容的雲端 API。偵測時原始文件內容會送到所設定的模型端點。如果原文要留在自己的環境，將偵測端點設在本機或內網，後續再把人工複核過的代號版送給雲端模型處理。
+
+### 擴充為團隊使用的 Web App
+
+`LLM_CONCURRENCY` 可調整單一程序同時送出的模型請求數。現有 Web App 使用 IP 白名單，文件分析由一個 worker 依序處理。要部署給多人使用，可接上登入或 SSO，為每份工作指定擁有者，並檢查審閱、下載及刪除的權限。若需要同時處理多份文件，則可擴充工作佇列來協調多個 worker，並隔離各使用者的檔案。 [範例設定](.env.example) · [Web API](deid/web/app.py) · [工作佇列](deid/jobs.py)
 
 ## 文件、測試與參與
 
