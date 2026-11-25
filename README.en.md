@@ -22,7 +22,9 @@ I started with Presidio. In my setup, legitimate street names, model numbers, an
 
 Upload a file, review the findings, and choose **full**, **partial**, or **custom** redaction for individual values. You can add missed text or select a region of an image or PDF page. The redacted download keeps the file format.
 
-![An English workbook in the review screen with full and partial redaction controls](docs/images/en-review.png)
+The review screen shows what will stay visible. In this example, partial redaction preserves the first and last characters before the `@` and the domain of each email address.
+
+![An English workbook in the review screen with partial redaction applied to names and email addresses](docs/images/en-review.png)
 
 VeilSpan can also redact text or selected regions inside embedded images. This fictional English email shows how it covers the sender’s and recipient’s names and email addresses while leaving the message readable.
 

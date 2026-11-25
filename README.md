@@ -6,7 +6,7 @@
 
 上傳 Word、Excel 或 PDF，逐筆確認個資，再下載遮蔽檔，或將原文轉成代號交給雲端模型處理。偵測以繁體中文與台灣常見的個資格式為主。
 
-![VeilSpan 首頁，顯示「遮蔽」和「代號＋還原」兩種功能](docs/images/zh-home.png)
+![VeilSpan 首頁，顯示「遮蔽」和「代號＋還原」兩種功能](docs/images/home.png)
 
 ## Agentic 偵測怎麼運作
 
@@ -37,9 +37,34 @@
 
 ### 文件遮蔽
 
-以虛構的 Excel 通訊錄為例。可逐筆核對姓名與電子郵件，再對不同欄位選擇全遮、半遮或自訂。
+下圖是同一份虛構 Excel 通訊錄的全遮與半遮輸出，供對照遮蔽範圍。
 
-![檢查畫面中，姓名套用半遮，電子郵件維持全遮](docs/images/zh-review.png)
+#### 全遮
+
+選定的姓名、電話、生日與電子郵件都已遮蔽。表格版面與原先未選取的欄位仍可閱讀。
+
+![全遮 DEMO，選定欄位的內容都已遮蔽](docs/images/excel-full-mask.png)
+
+#### 半遮
+
+姓名和電話保留部分字元。這份範例中的信箱保留 `@` 前的首尾字元與網域，其餘字元以星號遮蔽。
+
+![半遮 DEMO，姓名、電話與信箱只顯示部分字元](docs/images/excel-partial-mask.png)
+
+<details>
+<summary>查看原始範本與遮法設定</summary>
+
+**原始範本**
+
+![遮蔽前的虛構 Excel 通訊錄](docs/images/excel-original.png)
+
+**編輯遮法**
+
+![檢查畫面可整類切換半遮，也可逐筆選擇遮法](docs/images/review-mask-settings.png)
+
+</details>
+
+#### 圖片遮蔽
 
 文件內的圖片也能遮蔽。下圖是郵件截圖的遮蔽結果，寄件者與收件者資訊已用黑框蓋住。
 
@@ -49,11 +74,20 @@
 
 將選定的個資換成 `[姓名1]`、`[電子郵件1]` 等代號，下載維持原格式的代號版和同一批還原檔。
 
-![代號版 Excel、純文字與同批還原檔的下載畫面](docs/images/zh-placeholders.png)
+![Excel 代號版，姓名、電話、生日與信箱以方括號代號呈現](docs/images/excel-placeholders.png)
 
 複核後只把代號版交給雲端處理。拿到回覆後，選取本地保存的還原檔，即可把回覆裡的代號換回原文。
 
-![虛構的雲端回覆與在本地還原後的結果](docs/images/zh-restore.png)
+![還原畫面，上方是含代號的雲端回覆，下方是還原後的文字](docs/images/restore-cloud-reply.png)
+
+<details>
+<summary>查看未出現在回覆中的代號</summary>
+
+還原後可核對哪些代號沒有出現在雲端回覆中。
+
+![還原結果列出還原檔內未在回覆中使用的代號](docs/images/restore-unused-placeholders.png)
+
+</details>
 
 ## 為什麼做
 
