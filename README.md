@@ -20,9 +20,9 @@ Upload a file, review the findings, and choose **full**, **partial**, or **custo
 
 ![An English workbook in the review screen with full and partial redaction controls](docs/images/en-review.png)
 
-VeilSpan can also redact text or selected regions inside embedded images. In this Traditional Chinese email screenshot, black boxes cover the sender and recipient details.
+VeilSpan can also redact text or selected regions inside embedded images. This fictional English email shows how it covers the sender’s and recipient’s names and email addresses while leaving the message readable.
 
-![An email screenshot with black boxes covering the sender and recipient details](docs/images/image-redaction.png)
+![English email with the sender and recipient names and email addresses covered by black boxes](docs/images/en-image-redaction.png)
 
 ## Use placeholders and restore a cloud reply
 
