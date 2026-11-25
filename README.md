@@ -1,93 +1,96 @@
-# VeilSpan
+# VeilSpan 文件去識別化
 
-Self-hosted, agentic redaction and reversible masking for Traditional Chinese documents.
+為繁體中文文件設計的自架式 Agentic 遮蔽與代號還原工具。
 
-English · [繁體中文](README.zh-TW.md)
+繁體中文 · [English](README.en.md)
 
-VeilSpan finds sensitive information in Word, Excel, and PDF files. Review the findings before exporting, choose how much to redact, or replace selected values with placeholders for a cloud model and restore them locally afterward.
+上傳 Word、Excel 或 PDF，逐筆確認個資，再下載遮蔽檔，或將原文轉成代號交給雲端模型處理。偵測以繁體中文與台灣常見的個資格式為主。
 
-![VeilSpan home page in English with the Redaction and Placeholders workflows](docs/images/en-home.png)
+![VeilSpan 首頁，顯示「遮蔽」和「代號＋還原」兩種功能](docs/images/zh-home.png)
 
-## Agentic detection
+## Agentic 偵測怎麼運作
 
-The model uses tools to decide what to inspect next. It can read text in context, search for alternate spellings of a name, inspect images, and flag uncertain findings. VeilSpan tracks which parts were reviewed and runs standard detection over unchecked parts if the agent stops early. Rules cover common identifiers such as email addresses and checksum-validated IDs.
+模型會透過工具決定下一步要查什麼，例如讀取前後文、搜尋姓名變體、查看圖片，或標記疑似誤判。VeilSpan 會追蹤哪些部分已檢查。代理提早停止時，未檢查的部分會交由標準流程補查。電子郵件和可驗證檢查碼的證號等常見格式也有規則保底。
 
-Contextual detection quality and processing time depend on the model you choose. Look for reliable tool calling and strong Traditional Chinese comprehension. Image input enables model-assisted image review. After you approve the findings, VeilSpan applies the selected redactions or placeholders and checks the generated output for remaining matches.
+上下文判斷的品質和處理時間會受所選模型影響。建議選擇繁中理解及工具呼叫能力穩定的模型。支援圖片輸入的模型也可協助判斷圖片。使用者確認要處理的位置後，VeilSpan 依選取結果遮蔽或寫入代號，並檢查輸出是否仍有殘留。
 
-## Why I built it
+## 兩種用法
 
-I started with Presidio. In my setup, legitimate street names, model numbers, and organization names were often redacted from Taiwanese documents. I built VeilSpan so I could use document context to review findings and keep the original file format when sharing the result.
+| 功能 | 流程 |
+|---|---|
+| **文件遮蔽** | 檢查偵測結果，選擇全遮、半遮或自訂，再下載同格式的檔案。適合對外分享和交付。 |
+| **代號化＋還原** | 在自架環境把個資換成 `[姓名1]` 之類的代號，將代號版交給雲端模型。處理完後，用同一批產生的還原檔在本地把代號換回原文，保留雲端修改過的內容。 |
 
-## Redact a document
+請只將複核後的代號版交給雲端。還原檔含未加密的原文對照，請留在本地。交給雲端時，可以加上這句：
 
-Upload a file, review the findings, and choose **full**, **partial**, or **custom** redaction for individual values. You can add missed text or select a region of an image or PDF page. The redacted download keeps the file format.
+> 請逐字保留所有方括號代號，例如 `[姓名1]`、`[姓名1b]` 和 `[電話1]`。
 
-![An English workbook in the review screen with full and partial redaction controls](docs/images/en-review.png)
+| 格式 | 遮蔽輸出 | 代號化與還原 |
+|---|---|---|
+| Word（`.docx`） | Word | Word 或文字 |
+| Excel（`.xlsx`、`.xlsm`） | Excel | Excel 或文字 |
+| PDF（含掃描件） | PDF | 文字 |
 
-VeilSpan can also redact text or selected regions inside embedded images. This fictional English email shows how it covers the sender’s and recipient’s names and email addresses while leaving the message readable.
+右上角可切換繁體中文與 English。產生代號版時會使用所選語言，例如繁中 `[姓名1]`、`[電子郵件1]`，英文 `[NAME1]`、`[EMAIL1]`。使用與代號版同一次產生的還原檔，即可在任一介面語言還原。英文姓名和 Email 也能處理，電話、證號與部分遮蔽規則以台灣格式為主。
 
-![English email with the sender and recipient names and email addresses covered by black boxes](docs/images/en-image-redaction.png)
+## 操作示例
 
-## Use placeholders and restore a cloud reply
+### 文件遮蔽
 
-1. Choose **Placeholders + restore**, upload a file, and review the findings. Download the copy with placeholders and the `.deidr` restore key from the same export.
-2. Share the reviewed copy with your cloud model. Keep the restore key local. It contains the original values in plaintext. The optional redaction report also contains original values.
-3. Paste the model’s reply or upload its file in VeilSpan and select the matching restore key. VeilSpan fills in the original values while retaining the other changes in the reply.
+以虛構的 Excel 通訊錄為例。可逐筆核對姓名與電子郵件，再對不同欄位選擇全遮、半遮或自訂。
 
-> Keep bracketed placeholders such as `[NAME1]`, `[NAME1b]`, and `[EMAIL1]` exactly as written.
+![檢查畫面中，姓名套用半遮，電子郵件維持全遮](docs/images/zh-review.png)
 
-![VeilSpan downloads for the workbook with placeholders and the matching restore key](docs/images/en-placeholders.png)
+文件內的圖片也能遮蔽。下圖是郵件截圖的遮蔽結果，寄件者與收件者資訊已用黑框蓋住。
 
-![A fictional cloud reply with placeholders and the values restored locally](docs/images/en-restore.png)
+![郵件截圖中的寄件者與收件者資訊已塗黑](docs/images/image-redaction.png)
 
-The language selector changes the interface and new placeholder exports. English uses codes such as `[NAME1]` and `[EMAIL1]`. Traditional Chinese uses `[姓名1]` and `[電子郵件1]`. Restore uses the codes stored in the original export’s key in either interface language.
+### 代號化＋還原
 
-## Formats and limits
+將選定的個資換成 `[姓名1]`、`[電子郵件1]` 等代號，下載維持原格式的代號版和同一批還原檔。
 
-| Input | Redacted download | Placeholders and restore |
-| --- | --- | --- |
-| Word (`.docx`) | Word | Word or plain text |
-| Excel (`.xlsx`, `.xlsm`) | Excel | Excel or plain text |
-| PDF, including scanned pages for redaction | PDF | Plain text |
+![代號版 Excel、純文字與同批還原檔的下載畫面](docs/images/zh-placeholders.png)
 
-VeilSpan is designed for Traditional Chinese and Taiwanese identifiers. It also handles examples such as English names and email addresses. Phone, identity number, and partial redaction rules are primarily tailored to Taiwan.
+複核後只把代號版交給雲端處理。拿到回覆後，選取本地保存的還原檔，即可把回覆裡的代號換回原文。
 
-Some fields, such as Word ChartEx charts, Excel chart print headers, and PDF form field names and tooltips, are outside the current detection coverage and may be skipped without a warning. In Word and Excel placeholder files, images and some hidden content are redacted permanently. PDF replies with image-only content need to be pasted as text. Review the findings and output before sharing. [Detailed usage and limits (Traditional Chinese)](docs/usage.md)
+![虛構的雲端回覆與在本地還原後的結果](docs/images/zh-restore.png)
 
-## Run locally
+## 為什麼做
 
-Use Linux with Python 3.12 and an OpenAI-compatible Chat Completions endpoint. Setup downloads the OCR and face detection models.
+我原本用 Presidio 處理繁中文件。在我當時的配置和文件上，個資大多抓得到，但路名、型號和機關名稱也常被遮掉，交付前得逐筆改回來。我因此做了一套把文件上下文、人工審閱和原格式輸出接在一起的工具。
+
+## 快速開始
+
+需要 Linux、Python 3.12，以及可連線的 OpenAI 相容 Chat Completions 端點。安裝會下載 OCR 和人臉偵測模型。
 
 ```bash
 ./scripts/setup.sh
 ```
 
-Set `LLM_BASE_URL`, `LLM_MODEL`, and, if required, `LLM_API_KEY` in the generated `.env` file. The example binds the web service to loopback.
+編輯安裝時建立的 `.env`，依你的模型服務填入 `LLM_BASE_URL`、`LLM_MODEL` 和需要的 `LLM_API_KEY`。設定範例預設只允許這台電腦連線。
 
 ```bash
 ./run.sh
 ```
 
-Open `http://127.0.0.1:8620/?lang=en`. For Docker, run `./scripts/docker-up.sh` after setting up `.env`. This option uses the host Docker socket to start read-only document inspection containers.
+瀏覽器開啟 `http://127.0.0.1:8620`。如需用 Docker 部署，執行 `./scripts/docker-up.sh`。Docker 會掛載主機的 Docker socket，以啟動隔離的文件檢查容器。
 
-### Choose where detection runs
+### 選擇偵測模型的部署位置
 
-The detection endpoint can be a local model, an internal server, or a compatible cloud API. VeilSpan sends original document content to the configured endpoint during detection. To keep originals in your environment, use a local or internal endpoint for detection and send the reviewed placeholder copy to a cloud model for the follow-up task.
+偵測可接本機模型、內網服務或相容的雲端 API。偵測時原始文件內容會送到所設定的模型端點。如果原文要留在自己的環境，將偵測端點設在本機或內網，後續再把人工複核過的代號版送給雲端模型處理。
 
-### Extend the web app for a team
+### 擴充為團隊使用的 Web App
 
-`LLM_CONCURRENCY` limits simultaneous model requests per process. The default web app queues document analysis on one worker and uses an IP allowlist for access. For a team deployment, add sign-in or SSO, assign jobs to users, and check permissions for review, downloads, and deletion. To analyze multiple documents at once, extend the job queue to coordinate multiple workers and isolate each user’s files. [Example settings](.env.example) · [Web API](deid/web/app.py) · [Job queue](deid/jobs.py)
+`LLM_CONCURRENCY` 可調整單一程序同時送出的模型請求數。現有 Web App 使用 IP 白名單，文件分析由一個 worker 依序處理。要部署給多人使用，可接上登入或 SSO，為每份工作指定擁有者，並檢查審閱、下載及刪除的權限。若需要同時處理多份文件，則可擴充工作佇列來協調多個 worker，並隔離各使用者的檔案。 [範例設定](.env.example) · [Web API](deid/web/app.py) · [工作佇列](deid/jobs.py)
 
-## Test and contribute
+## 文件、測試與參與
 
-```bash
-DEID_SKIP_LIVE=1 .venv/bin/python -m pytest
-```
+- [使用手冊](docs/usage.md)包含遮法、代號與還原、支援範圍、已知限制和 CLI。
+- [第三方授權](THIRD_PARTY_NOTICES.md)列出 Python 套件、模型及容器使用的元件。
+- 在安裝後執行 `DEID_SKIP_LIVE=1 .venv/bin/python -m pytest`，即可跑本機測試。Docker 測試需要可使用的隔離映像。
 
-The suite covers file parsing, redaction, placeholder export, restore, and the web API. Docker and browser tests use a local sandbox image and Chromium where available.
+歡迎分享可以重現的繁中誤遮、漏遮或版面案例，也歡迎交流模型設定。提交範例時請用自行建立的虛構文件。如果能同時寫出「哪些字應該遮、哪些應該留下」，就能一起把案例做成回歸測試。
 
-I welcome reproducible reports of false positives, missed findings, and layout issues, especially for Traditional Chinese documents. Please use fictional examples and include what you expected to be redacted or retained.
+## 授權
 
-## License
-
-[AGPL-3.0-only](LICENSE). [Third-party notices](THIRD_PARTY_NOTICES.md) cover dependencies and the OCR and face detection models.
+VeilSpan 程式碼採 [GNU Affero General Public License v3.0 only（AGPL-3.0-only）](LICENSE)。
