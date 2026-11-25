@@ -1,10 +1,12 @@
 # VeilSpan
 
-Self-hosted, agentic redaction and reversible masking for Traditional Chinese documents.
-
 English · [繁體中文](README.md)
 
-VeilSpan finds sensitive information in Word, Excel, and PDF files. Review the findings before exporting, choose how much to redact, or replace selected values with placeholders for a cloud model and restore them locally afterward.
+**How much time do you spend restoring model numbers and organization names that were redacted by mistake?**
+
+VeilSpan is a self-hosted web app for Traditional Chinese documents from Taiwan. Upload a Word, Excel, or PDF file, review each finding, and choose full, partial, or custom redaction. Download the result in the original file format.
+
+If you need to use a cloud model, use a local or private detection endpoint to prepare a copy with placeholders such as `[NAME1]`. When you get a Word or Excel reply back, use the restore key from the same export to put the original values back while keeping the model’s edits.
 
 ![VeilSpan home page in English with the Redaction and Placeholders workflows](docs/images/en-home.png)
 
