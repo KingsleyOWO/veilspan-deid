@@ -1,0 +1,21 @@
+# 測試用的真實文件含個資，永遠不進版本庫
+/*.docx
+/*.pdf
+/*.xlsx
+/*.xlsm
+/*.xls
+/samples/
+# 執行期資料與密鑰
+/data/
+.env
+.env.*
+!.env.example
+*.deidr
+*.report.json
+report.json
+# 環境與快取
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+/models/

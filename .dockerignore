@@ -1,0 +1,7 @@
+# 只把程式和依賴清單送進建置環境。
+*
+!deid
+!requirements.txt
+!requirements.lock
+**/__pycache__
+**/*.pyc

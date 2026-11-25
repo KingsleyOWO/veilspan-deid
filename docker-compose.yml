@@ -1,0 +1,31 @@
+# 用 scripts/docker-up.sh 啟動（它會填好下面的變數）。直接用 docker compose 時要自己設定：
+#   DEID_UID / DEID_GID  容器內執行服務的使用者（資料夾的擁有者）
+#   DOCKER_GID           主機上 /var/run/docker.sock 的群組
+#   DEID_DATA            資料夾的絕對路徑
+#   ALLOWED_CLIENTS      允許連線的位址，寫在 .env；沒有設定就不啟動
+services:
+  deid:
+    build: .
+    image: deid-app:1
+    container_name: deid
+    restart: unless-stopped          # 開機、Docker 重啟後自動起來；手動 stop 之後不會
+    # 使用主機網路：不經過 Docker 的連接埠轉送，主機防火牆（ufw）的規則照常有效。
+    # 改成 ports: 對外發布的話，Docker 會繞過 ufw，只剩 ALLOWED_CLIENTS 把關。
+    network_mode: host
+    user: "${DEID_UID:?}:${DEID_GID:?}"
+    group_add: ["${DOCKER_GID:?}"]
+    environment:
+      DATA_DIR: "${DEID_DATA:?}"
+      ALLOWED_CLIENTS: "${ALLOWED_CLIENTS:?請在 .env 設定 ALLOWED_CLIENTS（允許連線的位址）}"
+      PORT: "${PORT:-8620}"
+    volumes:
+      - ./.env:/app/.env:ro
+      - /etc/localtime:/etc/localtime:ro   # 紀錄用主機的時區
+      # 容器內外用同一個路徑：腳本隔離容器是由主機的 Docker 掛載上傳的檔案，路徑必須是主機上的路徑。
+      - "${DEID_DATA}:${DEID_DATA}"
+      - /var/run/docker.sock:/var/run/docker.sock
+    read_only: true
+    tmpfs:
+      - /tmp:size=2g,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]

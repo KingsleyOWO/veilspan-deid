@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-i18n>文件去識別化</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <h1 data-i18n>文件去識別化</h1>
+  <span class="note" data-i18n>文件內容會送往設定的模型端點。若要讓原文留在本機或內網，請選用該環境的模型。</span>
+  <div class="language">
+    <label for="language" data-i18n>語言 / Language</label>
+    <select id="language">
+      <option value="zh-TW" lang="zh-Hant">繁體中文</option>
+      <option value="en" lang="en">English</option>
+    </select>
+  </div>
+  <button id="go-home" class="home" hidden data-i18n data-i18n-title title="回到首頁。這份文件不會被刪除，之後可以用同一個網址回來">回首頁</button>
+</header>
+
+<main id="upload" class="screen" hidden>
+  <p id="upload-left" class="resume" hidden><span id="upload-left-name"></span> <button id="upload-left-back" class="link" data-i18n>回到這份文件</button></p>
+  <div class="choices">
+    <section class="choice">
+      <h2 data-i18n>遮蔽</h2>
+      <p data-i18n>檢查偵測到的個資，再下載維持原格式的遮蔽檔。可選擇全遮、遮一半或自訂要遮的字。</p>
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="選擇或拖放要遮蔽的檔案" data-i18n="aria-label">
+        <p class="big" data-i18n>把檔案拖到這裡，或點一下選擇檔案</p>
+        <p data-i18n>支援 Word（.docx）、Excel（.xlsx、.xlsm）與 PDF。</p>
+        <input id="file" type="file" accept=".docx,.pdf,.xlsx,.xlsm" hidden>
+      </div>
+    </section>
+    <section class="choice">
+      <h2 data-i18n>代號＋還原</h2>
+      <p data-i18n>把個資換成 [姓名1] 這類代號，再將代號版交給雲端處理。取得回覆後，可在這裡把代號換回原文。Word、Excel 可下載同格式的檔案和文字，PDF 則輸出文字。</p>
+      <div id="drop-code" class="drop" tabindex="0" role="button" aria-label="選擇或拖放要換成代號的檔案" data-i18n="aria-label">
+        <p class="big" data-i18n>把檔案拖到這裡，或點一下選擇檔案</p>
+        <p data-i18n>支援 Word（.docx）、Excel（.xlsx、.xlsm）與 PDF。</p>
+        <p data-i18n>會得到代號版和還原檔。還原檔含有原始個資且未加密，請留在本地。</p>
+        <input id="file-code" type="file" accept=".docx,.pdf,.xlsx,.xlsm" hidden>
+      </div>
+      <div class="row">
+        <button id="go-restore" data-i18n>還原雲端的回覆</button>
+      </div>
+    </section>
+  </div>
+  <p id="upload-error" class="error" hidden></p>
+</main>
+
+<main id="restore" class="screen" hidden>
+  <div class="card wide">
+    <h2 data-i18n>還原雲端的回覆</h2>
+    <p class="hint" data-i18n>貼上雲端回覆或上傳回覆檔，將代號換回原始資料。上傳的回覆檔處理完就會刪除。</p>
+    <div class="field">
+      <button id="restore-key-pick" type="button" aria-describedby="restore-key-name" data-i18n>選擇還原檔</button>
+      <span id="restore-key-name" class="file-name"></span>
+      <input id="restore-key" type="file" accept=".deidr" hidden>
+    </div>
+    <label id="restore-password-field" class="field" hidden><span data-i18n>密碼（這個還原檔是之前用密碼加密的）</span> <input id="restore-password" type="password" autocomplete="off"></label>
+    <label class="field" for="restore-input" data-i18n>雲端的回覆（貼在這裡）</label>
+    <textarea id="restore-input" rows="9" spellcheck="false"></textarea>
+    <div class="field">
+      <button id="restore-file-pick" type="button" aria-describedby="restore-file-name" data-i18n>或是選擇回覆檔</button>
+      <span id="restore-file-name" class="file-name"></span>
+      <input id="restore-file" type="file" accept=".docx,.pdf,.xlsx,.xlsm" hidden>
+    </div>
+    <p class="hint" data-i18n>上傳 Word 或 Excel：可以下載還原後的同一種檔案（格式不變，只把代號換回原文），也會顯示文字。上傳 PDF：只能還原成文字。圖片裡的文字不會讀取。</p>
+    <div class="row">
+      <button id="restore-run" class="primary" data-i18n>還原</button>
+      <button id="restore-home" data-i18n>回首頁</button>
+    </div>
+    <p id="restore-error" class="error" hidden></p>
+    <div id="restore-result" hidden>
+      <h3 id="restore-summary"></h3>
+      <textarea id="restore-output" rows="9" readonly spellcheck="false"></textarea>
+      <div class="row">
+        <button id="restore-file-save" class="primary" hidden>下載還原後的檔案</button>
+        <button id="restore-copy">複製還原後的文字</button>
+        <button id="restore-save" data-i18n>下載成文字檔</button>
+        <button id="restore-clear" data-i18n>清除畫面上的內容</button>
+      </div>
+      <div id="restore-about" hidden>
+        <h3 data-i18n>說明</h3>
+        <ul></ul>
+      </div>
+      <div id="restore-notes" hidden>
+        <h3 data-i18n>沒有讀取的部分</h3>
+        <ul></ul>
+      </div>
+      <div id="restore-unknown" hidden>
+        <h3 data-i18n>回覆裡有、但還原檔裡沒有的代號（沒有換回）</h3>
+        <ul></ul>
+      </div>
+      <div id="restore-unused" hidden>
+        <h3 data-i18n>還原檔裡有、但回覆裡沒有出現的代號</h3>
+        <ul></ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<main id="working" class="screen" hidden>
+  <div class="card">
+    <h2 id="working-name"></h2>
+    <p id="working-stage">準備中</p>
+    <div class="bar"><div id="working-bar"></div></div>
+    <p class="hint" data-i18n>大檔案或圖片很多時需要幾分鐘。可以先離開，之後用同一個網址回來。</p>
+    <div class="row">
+      <button id="working-cancel" data-i18n>取消並刪除</button>
+    </div>
+  </div>
+</main>
+
+<main id="failed" class="screen" hidden>
+  <div class="card">
+    <h2 id="failed-name"></h2>
+    <p id="failed-error" class="error"></p>
+    <div class="row">
+      <button id="failed-retry" class="primary" data-i18n>重試</button>
+      <button id="failed-delete" data-i18n>刪除並重新上傳</button>
+    </div>
+  </div>
+</main>
+
+<main id="review" class="screen review" hidden>
+  <div class="toolbar">
+    <div class="file">
+      <strong id="review-name"></strong>
+      <span id="review-summary" class="chips"></span>
+    </div>
+    <div class="row">
+      <button id="btn-result" hidden data-i18n data-i18n-title title="清單沒有更動，剛才產生的檔案還在：可以再看一次結果、再下載">查看結果與下載</button>
+      <button id="btn-apply" class="primary">產生遮蔽檔</button>
+      <button id="btn-delete" data-i18n>刪除</button>
+    </div>
+  </div>
+  <details id="warnings" class="panel warn" hidden>
+    <summary></summary>
+    <ul></ul>
+  </details>
+  <details id="agent-log" class="panel" hidden>
+    <summary></summary>
+    <ol></ol>
+  </details>
+  <div class="columns">
+    <section id="doc" class="doc" aria-label="文件內容" data-i18n="aria-label"></section>
+    <aside class="side" aria-label="遮蔽項目" data-i18n="aria-label">
+      <form id="add-text" class="addbar">
+        <input id="add-text-input" type="text" placeholder="新增要遮蔽的文字（全文）" autocomplete="off">
+        <select id="add-text-type"></select>
+        <button data-i18n>新增</button>
+      </form>
+      <p id="add-text-error" class="error" hidden></p>
+      <p id="partial-note" class="hint" hidden data-i18n>遮一半與自訂只遮部分的字：圖片裡的文字仍然整筆塗黑，Excel 的數字格與日期格仍然整格遮蔽。留下的字加上同一列的其他欄位，仍可能認得出是誰，請自行判斷是否合用。</p>
+      <div id="list" class="list"></div>
+    </aside>
+  </div>
+</main>
+
+<div id="selbtn" class="selbtn" hidden><button data-i18n>遮蔽選取的文字</button></div>
+
+<div id="popover" class="popover" hidden>
+  <p id="popover-title"></p>
+  <label><span data-i18n>類型</span> <select id="popover-type"></select></label>
+  <label id="popover-all-row"><input id="popover-all" type="checkbox" checked> <span data-i18n>全文相同內容一起遮</span></label>
+  <div class="row">
+    <button id="popover-ok" class="primary" data-i18n>遮蔽</button>
+    <button id="popover-cancel" data-i18n>取消</button>
+  </div>
+</div>
+
+<div id="result" class="overlay" hidden>
+  <div class="card wide">
+    <h2 id="result-title"></h2>
+    <p id="result-text"></p>
+    <ul id="result-issues" class="issues"></ul>
+    <div id="result-notes" hidden>
+      <h3 data-i18n>依你的設定保留、檔案中仍找得到的內容</h3>
+      <ul></ul>
+    </div>
+    <div id="result-unchecked" hidden>
+      <h3 data-i18n>沒有檢查到的部分</h3>
+      <ul></ul>
+    </div>
+    <div id="result-file-notes" hidden>
+      <h3 data-i18n>關於代號版檔案</h3>
+      <ul></ul>
+    </div>
+    <label id="result-ack-row" hidden><input id="result-ack" type="checkbox"> <span data-i18n>我知道仍有殘留，仍要下載</span></label>
+    <div class="row">
+      <button id="result-coded" class="primary" hidden>下載代號版檔案</button>
+      <button id="result-download" class="primary">下載遮蔽檔</button>
+      <button id="result-restore" class="primary" hidden data-i18n>下載還原檔</button>
+      <button id="result-report" data-i18n data-i18n-title title="清單列出文件裡的原始內容，本身含有個資，請妥善保管">下載遮蔽清單</button>
+      <button id="result-back" data-i18n>回到檢查</button>
+    </div>
+    <p id="result-hint" class="hint"></p>
+  </div>
+</div>
+
+<div id="busy" class="overlay" hidden><div class="card"><p id="busy-text">處理中…</p></div></div>
+<script src="/static/i18n.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
